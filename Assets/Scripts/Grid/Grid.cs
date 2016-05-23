@@ -19,7 +19,7 @@ public class Grid
         {
             for (int x = 0; x < sizeX; x++)
             {
-                Node newNode = new Node(x, y, TerrainType.Grass);
+                Node newNode = new Node(x, y, TerrainType.Grass, true);
 
                 nodes.Add(newNode);
             }
@@ -31,9 +31,9 @@ public class Grid
         return nodes;
     }
 
-    public List<Node> GetNeighbours(Node node)
+    public List<Node> GetConnections(Node node)
     {
-        List<Node> neighbours = new List<Node>();
+        List<Node> connections = new List<Node>();
 
         int xPosition;
         int yPosition;
@@ -49,13 +49,13 @@ public class Grid
 
                     if (AssetWithinBorders(xPosition, yPosition))
                     {
-                        neighbours.Add(GetNodeFromPosition(xPosition, yPosition));
+                        connections.Add(GetNodeFromPosition(xPosition, yPosition));
                     }
                 }
             }
         }
 
-        return neighbours;
+        return connections;
     }
 
     private bool AssetWithinBorders(int x, int y)

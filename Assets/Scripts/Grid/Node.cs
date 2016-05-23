@@ -6,11 +6,12 @@ public class Node
     [SerializeField] private int xPosition;
     [SerializeField] private int yPosition;
         
-    public Node(int x, int y, TerrainType type)
+    public Node(int x, int y, TerrainType type, bool isWalkable)
     {
         xPosition = x;
         yPosition = y;
         TerrainType = type;
+        Walkable = isWalkable;
     }
 
     public int X
@@ -34,6 +35,14 @@ public class Node
 
             Cost = Tiles.GetCost(terrainType);
         }
+    }
+
+    private bool walkable;
+
+    public bool Walkable
+    {
+        get { return walkable; }
+        set { walkable = value; }
     }
 
     public int Cost

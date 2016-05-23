@@ -58,26 +58,26 @@ public class AStar : MonoBehaviour
                 return RetracePath(startNode, targetNode);
             }
                 
-            foreach (Node neighbour in grid.GetNeighbours(currentNode)) 
+            foreach (Node connection in grid.GetConnections(currentNode)) 
             {
-                if (neighbour.Cost < 10 && !closedSet.Contains(neighbour))
+                if (connection.Walkable && !closedSet.Contains(connection))
                 {
-                    int costToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour) + neighbour.Cost;
+                    int costToConnection = currentNode.GCost + GetDistance(currentNode, connection) + connection.Cost;
 
-                    if (costToNeighbour < neighbour.GCost || !openSet.Contains(neighbour)) 
+                    if (costToConnection < connection.GCost || !openSet.Contains(connection))
                     {
-                        neighbour.GCost = costToNeighbour;
-                        neighbour.HCost = GetDistance(neighbour, targetNode);
-                        neighbour.Parent = currentNode;
+                        connection.GCost = costToConnection;
+                        connection.HCost = GetDistance(connection, targetNode);
+                        connection.Parent = currentNode;
 
                         if (showCostVisuals)
                         {
-                            GridManager.GetNodeVisual(neighbour).EnableCostVisuals(true);
+                            GridManager.GetNodeVisual(connection).EnableCostVisuals(true);
                         }
 
-                        if (!openSet.Contains(neighbour))
+                        if (!openSet.Contains(connection))
                         {
-                            openSet.Add(neighbour);
+                            openSet.Add(connection);
                         }
                     }
                 }
@@ -110,18 +110,14 @@ public class AStar : MonoBehaviour
         return path;
 	}
 
-	private int GetDistance(Node nodeA, Node nodeB) 
+    private int GetDistance(Node nodeA, Node nodeB) //Diagonal Shortcut
     {
         int distance;
 
         int xDistance = Mathf.Abs(nodeA.X - nodeB.X);
         int yDistance = Mathf.Abs(nodeA.Y - nodeB.Y);
 
-        if (xDistance == 0 || yDistance == 0)
-        {
-            distance = (xDistance + yDistance) * 10;
-        }
-        else if (xDistance > yDistance)
+        if (xDistance > yDistance)
         {
             distance = 14 * yDistance + 10 * (xDistance - yDistance);
         }

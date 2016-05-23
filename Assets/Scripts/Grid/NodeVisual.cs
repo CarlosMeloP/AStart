@@ -61,6 +61,8 @@ public class NodeVisual : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         {
             node.TerrainType = (TerrainType)(((int)node.TerrainType + 1) % (System.Enum.GetNames(typeof(TerrainType)).Length));
 
+            node.Walkable = Tiles.IsWalkable(node.TerrainType);
+
             SetColor(Tiles.GetColor(node.TerrainType));
         }
     }

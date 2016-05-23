@@ -14,8 +14,9 @@ public class Tiles : ScriptableObject
         public Color color;
 
         [Range(0, 10)]
-        [Header("Cost (10 = obstacle)")]
         public int cost;
+
+        public bool walkable = true;
     }
 
     private static readonly string path = "Tiles";
@@ -82,5 +83,15 @@ public class Tiles : ScriptableObject
     public static int GetCost(TerrainType terrainType)
     {
         return Instance.GetCostOfType(terrainType);
+    }
+
+    public bool Walkable(TerrainType terrainType)
+    {
+        return tiles[(int)terrainType].walkable;
+    }
+
+    public static bool IsWalkable(TerrainType terrainType)
+    {
+        return Instance.Walkable(terrainType);
     }
 }
