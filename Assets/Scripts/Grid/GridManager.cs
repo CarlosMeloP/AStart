@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Pathfinding;
 
 public class GridManager : MonoBehaviour 
 {
@@ -10,11 +11,17 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private float size = 1f;
 
-    private readonly string path =  "NodeVisual";
+    private readonly string pathLocation =  "NodeVisual";
 
     private static GridManager instance;
+    public static GridManager Instance
+    {
+        get { return instance; }
+    }
 
     private Grid grid;
+
+    private List<Node> path;
 
     private void Awake()
     {
@@ -49,7 +56,7 @@ public class GridManager : MonoBehaviour
 
         List<Node> gridNodes = grid.GetNodes();
 
-        GameObject nodeVisual = Resources.Load<GameObject>(path);
+        GameObject nodeVisual = Resources.Load<GameObject>(pathLocation);
 
         NodeVisual visual;
 
@@ -66,22 +73,22 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public Grid InternalGetGrid()
+    public List<Node> GetPath(Node start, Node target)
     {
-        return grid;
+        return AStar.FindPath(start, target, grid);
     }
 
-    public NodeVisual InternalGetVisual(Node node)
+    public NodeVisual GetVisual(Node node)
     {
-        return InternalGetVisual(node.X, node.Y);
+        return GetVisual(node.X, node.Y);
     }
        
-    public NodeVisual InternalGetVisual(int x, int y)
+    private NodeVisual GetVisual(int x, int y)
     {
         return visuals[x + y * gridSizeX];
     }
 
-    public Node InternalGetClosestNodeToWorldPosition(Vector3 position)
+    public Node GetClosestNodeToWorldPosition(Vector3 position)
     {
         int x = Mathf.RoundToInt((position.x + size) / size) - 1;
         int y = Mathf.RoundToInt((position.z + size) / size) - 1;
@@ -92,47 +99,8 @@ public class GridManager : MonoBehaviour
         return grid.GetNodeFromPosition(x, y);
     }
         
-    public Vector3 InternalGetWorldPosition(Node node)
+    public Vector3 GetWorldPosition(Node node)
     {
         return new Vector3(node.X * size, 0f, node.Y * size);
-    }
-
-    public static Grid GetGrid()
-    {
-        return instance.InternalGetGrid();
-    }
-
-    public static NodeVisual GetNodeVisual(Node node)
-    {
-        return instance.InternalGetVisual(node);
-    }
-
-    public static NodeVisual GetNodeVisual(int x, int y)
-    {
-        return instance.InternalGetVisual(x, y);
-    }
-
-    public static Node GetClosestNodeToWorldPosition(Vector3 position)
-    {
-        return instance.InternalGetClosestNodeToWorldPosition(position);
-    }
-
-    public static int GetDistance(Node nodeA, Node nodeB) 
-    {
-        int dstX = Mathf.Abs(nodeA.X - nodeB.X);
-        int dstY = Mathf.Abs(nodeA.Y - nodeB.Y);
-
-        if(dstX == 0 || dstY == 0)
-        {
-            return (dstX + dstY) * 10;
-        }
-        else if (dstX > dstY)
-            return 14*dstY + 10* (dstX-dstY);
-        return 14*dstX + 10 * (dstY-dstX);
-    }
-
-    public static Vector3 GetWorldPosition(Node node)
-    {
-        return instance.InternalGetWorldPosition(node);
     }
 }

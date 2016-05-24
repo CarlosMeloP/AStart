@@ -35,7 +35,7 @@ public class FollowState : State
     {
         if (currentNode != null)
         {
-            GridManager.GetNodeVisual(currentNode).Reset();
+            GridManager.Instance.GetVisual(currentNode).Reset();
         }
     }
 
@@ -81,7 +81,7 @@ public class FollowState : State
 
             SwitchNode();
 
-            targetPosition = GridManager.GetWorldPosition(currentNode) + Vector3.up / 2;
+            targetPosition = GridManager.Instance.GetWorldPosition(currentNode) + Vector3.up / 2;
 
             timeLeft = (targetPosition.Value - startPosition).magnitude / moveSpeed;
 
@@ -101,11 +101,11 @@ public class FollowState : State
     {
         if (currentNode != null)
         {
-            GridManager.GetNodeVisual(currentNode).Reset();
+            GridManager.Instance.GetVisual(currentNode).Reset();
         }
 
         currentNode = path.Dequeue();
 
-        GridManager.GetNodeVisual(currentNode).SetTint(Color.blue);
+        GridManager.Instance.GetVisual(currentNode).SetTint(Color.blue);
     }
 }

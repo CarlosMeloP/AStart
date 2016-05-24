@@ -1,131 +1,96 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class AStar : MonoBehaviour 
+namespace Pathfinding
 {
-    [SerializeField] private bool showCostVisuals = false;
-
-    [SerializeField] private Color gizmoColor;
-
-	private Grid grid;
-
-    private int sizeX, sizeY;
-
-    [SerializeField] private Transform start;
-    [SerializeField] private Transform target;
-
-    private void OnDrawGizmos()
+    public static class AStar 
     {
-        if (path != null && path.Count > 0)
+        static public List<Node> FindPath(Node startNode, Node targetNode, Grid grid) 
         {
-            Vector3 offset = Vector3.up;
+            List<Node> openSet = new List<Node>();
+            openSet.Add(startNode);
 
-            for (int i = 0; i < path.Count; i++)
+            List<Node> closedSet = new List<Node>();
+
+            while (openSet.Count > 0) 
             {
-                Gizmos.color = gizmoColor;
-                Gizmos.DrawWireCube(GridManager.GetWorldPosition(path[i]), Vector3.one); 
-            }
-        }
-    }
-
-    public List<Node> FindPath(Node startNode, Node targetNode) 
-    {
-        grid = GridManager.GetGrid();
-
-        List<Node> openSet = new List<Node>();
-        openSet.Add(startNode);
-
-        List<Node> closedSet = new List<Node>();
-
-        while (openSet.Count > 0) 
-        {
-            Node currentNode = openSet[0];
-            for (int i = 1; i < openSet.Count; i ++) 
-            {
-                if (openSet[i].FCost < currentNode.FCost 
-                    || (openSet[i].FCost == currentNode.FCost 
-                        && openSet[i].HCost < currentNode.HCost))
+                Node currentNode = openSet[0];
+                for (int i = 1; i < openSet.Count; i ++) 
                 {
-                    currentNode = openSet[i];
-                }
-            }
-
-            openSet.Remove(currentNode);
-            closedSet.Add(currentNode);
-
-            if (currentNode == targetNode)
-            {
-                return RetracePath(startNode, targetNode);
-            }
-                
-            foreach (Node connection in grid.GetConnections(currentNode)) 
-            {
-                if (connection.Walkable && !closedSet.Contains(connection))
-                {
-                    int costToConnection = currentNode.GCost + GetDistance(currentNode, connection) + connection.Cost;
-
-                    if (costToConnection < connection.GCost || !openSet.Contains(connection))
+                    if (openSet[i].FCost < currentNode.FCost 
+                        || (openSet[i].FCost == currentNode.FCost 
+                            && openSet[i].HCost < currentNode.HCost))
                     {
-                        connection.GCost = costToConnection;
-                        connection.HCost = GetDistance(connection, targetNode);
-                        connection.Parent = currentNode;
+                        currentNode = openSet[i];
+                    }
+                }
 
-                        if (showCostVisuals)
-                        {
-                            GridManager.GetNodeVisual(connection).EnableCostVisuals(true);
-                        }
+                openSet.Remove(currentNode);
+                closedSet.Add(currentNode);
 
-                        if (!openSet.Contains(connection))
+                if (currentNode == targetNode)
+                {
+                    return RetracePath(startNode, targetNode);
+                }
+
+                foreach (Node connection in grid.GetConnections(currentNode)) 
+                {
+                    if (connection.Walkable && !closedSet.Contains(connection))
+                    {
+                        int costToConnection = currentNode.GCost + GetEstimate(currentNode, connection) + connection.Cost;
+
+                        if (costToConnection < connection.GCost || !openSet.Contains(connection))
                         {
-                            openSet.Add(connection);
+                            connection.GCost = costToConnection;
+                            connection.HCost = GetEstimate(connection, targetNode);
+                            connection.Parent = currentNode;
+
+                            if (!openSet.Contains(connection))
+                            {
+                                openSet.Add(connection);
+                            }
                         }
                     }
                 }
             }
+
+            return null;
         }
 
-        return null;
-	}
-
-    private List<Node> path;
-
-    private List<Node> RetracePath(Node startNode, Node endNode) 
-    {
-        if (path != null)
+        private static List<Node> RetracePath(Node startNode, Node endNode) 
         {
-            path.Clear();
-        }
-		path = new List<Node>();
+            List<Node> path = new List<Node>();
 
-		Node currentNode = endNode;
+            Node currentNode = endNode;
 
-		while (currentNode != startNode) 
-        {
-			path.Add(currentNode);
-            currentNode = currentNode.Parent;
-		}
+            while (currentNode != startNode) 
+            {
+                path.Add(currentNode);
+                currentNode = currentNode.Parent;
+            }
 
-		path.Reverse();
+            path.Reverse();
 
-        return path;
-	}
-
-    private int GetDistance(Node nodeA, Node nodeB) //Diagonal Shortcut
-    {
-        int distance;
-
-        int xDistance = Mathf.Abs(nodeA.X - nodeB.X);
-        int yDistance = Mathf.Abs(nodeA.Y - nodeB.Y);
-
-        if (xDistance > yDistance)
-        {
-            distance = 14 * yDistance + 10 * (xDistance - yDistance);
-        }
-        else
-        {
-            distance = 14 * xDistance + 10 * (yDistance - xDistance);
+            return path;
         }
 
-        return distance;
-	}
+        private static int GetEstimate(Node nodeA, Node nodeB) //Diagonal Shortcut
+        {
+            int distance;
+
+            int xDistance = Mathf.Abs(nodeA.X - nodeB.X);
+            int yDistance = Mathf.Abs(nodeA.Y - nodeB.Y);
+
+            if (xDistance > yDistance)
+            {
+                distance = 14 * yDistance + 10 * (xDistance - yDistance);
+            }
+            else
+            {
+                distance = 14 * xDistance + 10 * (yDistance - xDistance);
+            }
+
+            return distance;
+        }
+    }
 }

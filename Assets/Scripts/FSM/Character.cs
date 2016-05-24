@@ -14,7 +14,6 @@ public class Character : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [SerializeField] private Transform target;
-    [SerializeField] private AStar pathFinding;
 
     [SerializeField] private float singleMoveTime = 0.5f;
     [SerializeField] private float rotationSpeed = 5f;
@@ -23,6 +22,8 @@ public class Character : MonoBehaviour
 
     private const string idleTrigger = "Idle";
     private const string runTrigger = "Run";
+
+    Queue<Node> path;
 
     private void Start()
     {
@@ -42,7 +43,7 @@ public class Character : MonoBehaviour
 
     private void MoveToTarget(Node targetNode)
     {
-        Queue<Node> path = GetPath(targetNode);
+        path = GetPath(targetNode);
 
         fsm.ChangeState(new FollowState(fsm, path, singleMoveTime, rotationSpeed));
     }
@@ -51,9 +52,9 @@ public class Character : MonoBehaviour
     {
         Queue<Node> path = null;
 
-        Node startNode = GridManager.GetClosestNodeToWorldPosition(Transform.position);
+        Node startNode = GridManager.Instance.GetClosestNodeToWorldPosition(Transform.position);
 
-        List<Node> nodes = pathFinding.FindPath(startNode, targetNode);
+        List<Node> nodes = GridManager.Instance.GetPath(startNode, targetNode);
 
         if (nodes != null && nodes.Count > 0)
         {
@@ -70,7 +71,7 @@ public class Character : MonoBehaviour
 
     private void OnCheckNode(Node node)
     {
-        GetPath(node);
+        path = GetPath(node);
     }
 
     private void OnSelectedTarget(Node node)
@@ -110,6 +111,29 @@ public class Character : MonoBehaviour
         set
         {
             myTransform = value;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        TryToDrawPath();
+    }
+
+    private void TryToDrawPath()
+    {
+        if (path != null && path.Count > 0)
+        {
+            Vector3 offset = Vector3.up;
+
+            foreach(Node pathNode in path)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireCube(GridManager.Instance.GetWorldPosition(pathNode), Vector3.one); 
+            }
+
+            Node startPoint = GridManager.Instance.GetClosestNodeToWorldPosition(myTransform.position);
+
+            Gizmos.DrawWireCube(GridManager.Instance.GetWorldPosition(startPoint), Vector3.one);
         }
     }
 }
